@@ -10,7 +10,7 @@ function upload(params) {
   }));
 
   const upload = s3Stream.upload({
-    Bucket: config.bucket, Key: 'audio/' + params.userId + '/' + params.audioId + '.m4a'
+    Bucket: config.bucket, ACL: 'public-read', Key: 'audio/' + params.userId + '/' + params.audioId + '.m4a'
   });
 
   params.content.pipe(upload);

@@ -1,27 +1,26 @@
 const MySql = require('mysql');
 const SQL = require('./sql');
 const config = require('./config.json');
-
-const connection = MySql.createConnection({
+const pool = MySql.createPool({
   host: config.host,
   user: config.user,
   password: config.password,
   database: config.database,
-  port: config.port
+  port: config.port,
+  connectionLimit : 5,
+  queueLimit: 2
 });
 
 function connect() {
-  connection.connect({multipleStatements: true}, function (err) {
-    if (err) {
-      console.error('connection error: ' + err.stack);
-      return;
-    }
-
-    console.log('connected as id ' + connection.threadId);
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, con)=>{
+      if(err) throw err;
+      resolve(con);
+    });
   });
 }
 
-function createHistory(param) {
+function createHistory(connection, param) {
   return new Promise((resolve, reject) => {
     const sqlParams = {fileName: param.audioId, createAt: param.createAt, user_id: param.userId, isCompleted: false};
     connection.query(SQL.INSERT_HISTORY, sqlParams, function (error, results, fields) {
@@ -31,7 +30,7 @@ function createHistory(param) {
   });
 }
 
-function createAudio(param) {
+function createAudio(connection, param) {
   return new Promise((resolve, reject) => {
     const sqlParams = {id: param.audioId, fileName: param.fileName, createAt: param.createAt, user_id: param.userId};
     connection.query(SQL.INSERT_AUDIO, sqlParams, function (error, results, fields) {
@@ -41,7 +40,7 @@ function createAudio(param) {
   });
 }
 
-function findHistoryAll(param) {
+function findHistoryAll(connection, param) {
   return new Promise((resolve, reject) => {
     connection.query(SQL.SELECT_HISTORY_BY_USER_ID, param, function (error, results, fields) {
       if (error) throw error;
@@ -51,7 +50,7 @@ function findHistoryAll(param) {
   });
 }
 
-function findHistoryCompleted(param) {
+function findHistoryCompleted(connection, param) {
   return new Promise((resolve, reject) => {
     connection.query(SQL.SELECT_HISTORY_USER_ID_AND_COMPLETE, param, function (error, results, fields) {
       if (error) throw error;
@@ -61,7 +60,7 @@ function findHistoryCompleted(param) {
   });
 }
 
-function findHistoryContinued(param) {
+function findHistoryContinued(connection, param) {
   return new Promise((resolve, reject) => {
     connection.query(SQL.SELECT_HISTORY_USER_ID_AND_CONTINUE, param, function (error, results, fields) {
       if (error) throw error;
@@ -71,7 +70,7 @@ function findHistoryContinued(param) {
   });
 }
 
-function findAudioAll(param) {
+function findAudioAll(connection, param) {
   return new Promise((resolve, reject) => {
     connection.query(SQL.SELECT_AUDIO_BY_USER_ID, param, function (error, results, fields) {
       if (error) throw error;
