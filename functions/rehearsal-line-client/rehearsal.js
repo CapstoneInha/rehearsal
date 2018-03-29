@@ -5,6 +5,7 @@ const repository = require('./repository');
 const config = require('./config.json');
 const crypto = require('crypto');
 const moment = require('moment');
+const Client = require('ssh2').Client;
 const rp = require('request-promise');
 
 const DEFAULT_MESSAGE = ' Rehearsal USAGE \n' +
@@ -42,8 +43,35 @@ function train(params) {
     //     console.log(err);
     //     return "Trainning Trigger Fail";
     //   });
-    resolve(params);
+
+    const conn = new Client();
+    let result = "Execute CMD\n";
+    conn.on('ready', function () {
+      conn.shell(function (err, stream) {
+        if (err) throw err;
+        stream.on('close', function () {
+          conn.end();
+          resolve(result.toString());
+        }).on('data', function (data) {
+          console.log('STDOUT: ' + data);
+          result += data + '\n';
+        }).stderr.on('data', function (data) {
+          console.log('STDERR: ' + data);
+          result += data + '\n';
+          reject(err);
+        });
+
+        stream.end('ls -l\nexit\n');
+      });
+    }).connect({
+      username: config.server_username,
+      host: config.server_host,
+      password: config.server_password,
+      port: config.server_port
+    });
+
   });
+
 }
 
 function outputFormat(param) {
@@ -110,8 +138,8 @@ module.exports.lineClient = (event, context, callback) => {
                 userId: userId,
                 createAt: moment().format('YYYY-MM-DD hh:mm:ss')
               }).then(train)
-                .then(() => {
-                  responsBody.text = "Trainnig Start";
+                .then((text) => {
+                  responsBody.text = text;
                   lineModule.replyMessage(replyToken, responsBody);
                 });
             } else if (cmd.length === 3 && cmd[0] === 'train' && cmd[1] === 'history' && cmd[2] === 'all') {
