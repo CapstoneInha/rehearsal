@@ -133,6 +133,7 @@ module.exports.lineClient = (event, context, callback) => {
             let cmd = msg.text.trim().toLowerCase().split(' ');
             if (cmd.length === 2 && cmd[0] === 'train' && cmd[1] === 'start') {
               // start
+              console.log("start");
               repository.createHistory(con, {
                 audioId: msg.id,
                 userId: userId,
@@ -143,11 +144,11 @@ module.exports.lineClient = (event, context, callback) => {
                   lineModule.replyMessage(replyToken, responsBody);
                 });
             } else if (cmd.length === 3 && cmd[0] === 'train' && cmd[1] === 'history' && cmd[2] === 'all') {
-
               // history all
               repository.findHistoryAll(con, [userId])
                 .then(outputFormat)
                 .then(result => {
+                  console.log(result);
                   responsBody.text = result;
                   lineModule.replyMessage(replyToken, responsBody);
                 });
@@ -156,6 +157,7 @@ module.exports.lineClient = (event, context, callback) => {
               repository.findHistoryContinued(con, [userId])
                 .then(outputFormat)
                 .then(result => {
+                  console.log(result);
                   responsBody.text = result;
                   lineModule.replyMessage(replyToken, responsBody);
                 });
@@ -164,6 +166,7 @@ module.exports.lineClient = (event, context, callback) => {
               repository.findHistoryCompleted(con, [userId])
                 .then(outputFormat)
                 .then(result => {
+                  console.log(result);
                   responsBody.text = result;
                   lineModule.replyMessage(replyToken, responsBody);
                 });
