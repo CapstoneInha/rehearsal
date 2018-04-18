@@ -1,0 +1,65 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src/main/java']
+        }
+        java {
+            srcDirs = []
+        }
+    }
+}
+
+dependencies {
+    compile(
+            'com.amazonaws:aws-lambda-java-core:1.1.0',
+            'com.amazonaws:aws-lambda-java-log4j:1.0.0',
+            'com.fasterxml.jackson.core:jackson-core:2.8.5',
+            'com.fasterxml.jackson.core:jackson-databind:2.8.5',
+            'com.fasterxml.jackson.core:jackson-annotations:2.8.5',
+            'mysql:mysql-connector-java:5.1.39',
+            'com.amazonaws:aws-java-sdk-s3:1.11.313',
+            'com.zaxxer:HikariCP:2.7.8',
+            'org.codehaus.groovy:groovy-all:2.4.12',
+            'org.apache.commons:commons-lang3:3.7',
+            'commons-codec:commons-codec:1.11',
+            'org.aspectj:aspectjweaver:1.8.13'
+    )
+}
+
+// Task for building the zip file for upload
+task buildZip(type: Zip) {
+    // Using the Zip API from gradle to build a zip file of all the dependencies
+    //
+    // The path to this zip file can be set in the serverless.yml file for the
+    // package/artifact setting for deployment to the S3 bucket
+    //
+    // Link: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Zip.html
+
+    // set the base name of the zip file
+    baseName = "rehearsal-api"
+    from compileJava
+    from compileGroovy
+
+    from processResources
+    into('lib') {
+        from configurations.runtime
+    }
+}
+
+build.dependsOn buildZip
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+}

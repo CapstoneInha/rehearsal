@@ -33,7 +33,10 @@ front/*.njsproj
 front/*.sln
 
 # Backend
-#functions/rehearsal-api/.idea/
+functions/rehearsal-api/.idea/
+functions/rehearsal-api/.serverless/
+functions/rehearsal-api/serverless.yml
+functions/rehearsal-api/src/main/resources/app.properties
 
 ### Intellij+iml ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
