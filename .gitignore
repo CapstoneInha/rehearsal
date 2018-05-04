@@ -31,9 +31,14 @@ front/*.suo
 front/*.ntvs*
 front/*.njsproj
 front/*.sln
+front/src/utils/Constants.json
 
 # Backend
-#functions/rehearsal-api/.idea/
+functions/rehearsal-api/.idea/
+functions/rehearsal-api/.serverless/
+functions/rehearsal-api/serverless.yml
+functions/rehearsal-api/src/main/resources/**
+functions/rehearsal-api/src/main/java/com/serverless/utility/Constants.java
 
 ### Intellij+iml ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
