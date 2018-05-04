@@ -1,188 +1,216 @@
 <template>
-  <div class="md-layout md-alignment-center-center">
-    <div class="md-layout-item md-medium-size-33 md-small-size-50 md-xsmall-size-100">
-      <md-card-content>
-        <div class="md-layout md-gutter">
-          <div class="md-layout-item md-small-size-100">
-            <div ref="peaksref"></div>
-
-            <audio ref="audioref" id="audioId" preload="auto">
-              <source
-                src=""
-                type="audio/ogg">
-            </audio>
-            <script src="bower_components/requirejs/require.js" data-main="app.js"></script>
-
-            <form novalidate class="md-layout md-gutter" @submit.prevent="uploads()">
-              <div class="md-layout-item md-small-size-100">
-                <md-field>
-                  <label>AUDIO FILE</label>
-                  <md-file v-model="multiple" name="files" id="files" multiple/>
-                </md-field>
-              </div>
-              <md-card-actions>
-                <md-button type="submit" class="md-primary" :disabled="sending">UPLOAD</md-button>
-                <md-button @click="play">Click Me to Play Sound</md-button>
-              </md-card-actions>
+  <div class="card-expansion">
+    <div>
+      <md-empty-state
+        md-icon="devices_other"
+        md-label="Create your new project"
+        md-description="Creating project, you'll be able to upload your design and collaborate with people.">
+        <md-dialog :md-active.sync="showDialog">
+          <div>
+            <form class="md-layout" @submit.prevent="saveProject" method="post">
+              <md-card class="md-layout-item md-size-100 md-medium-size-100 md-small-size-100">
+                <md-card-header>
+                  <div class="md-title">Projects</div>
+                </md-card-header>
+                <md-card-content>
+                  <div class="md-layout md-gutter">
+                    <div class="md-layout-item md-size-100 md-medium-size-100 md-small-size-100">
+                      <md-field>
+                        <label for="title">Title</label>
+                        <md-input name="title" id="title" autocomplete="given-name" v-model="project.title"/>
+                      </md-field>
+                    </div>
+                    <div class="md-layout-item md-size-100 md-medium-size-100 md-small-size-100">
+                      <md-field>
+                        <label for="plot">Plot</label>
+                        <md-input name="plot" id="plot" autocomplete="family-name" v-model="project.plot"/>
+                      </md-field>
+                    </div>
+                    <div class="md-layout-item md-size-100 md-medium-size-100 md-small-size-100">
+                      <md-field>
+                        <label for="file">PDF FILE</label>
+                        <md-file name="file" id="file" accept="pdf/*"
+                                 @change="onFileChange($event)"/>
+                      </md-field>
+                    </div>
+                  </div>
+                </md-card-content>
+                <md-card-actions>
+                  <md-button type="submit" class="md-primary">Create project</md-button>
+                </md-card-actions>
+              </md-card>
+              <md-snackbar :md-active.sync="userSaved">The project was saved with success!</md-snackbar>
             </form>
           </div>
-        </div>
-      </md-card-content>
+        </md-dialog>
+        <span v-if="value">Value: {{ value }}</span>
+        <md-button class="md-primary md-raised" @click="showDialog = true">Create new project</md-button>
+      </md-empty-state>
     </div>
 
-    <div class="md-layout-item md-medium-size-33 md-small-size-50 md-xsmall-size-50">
-      <md-card-content>
-        <md-table v-model="searched" md-sort="name" md-sort-order="asc" md-card md-fixed-header>
-          <md-table-toolbar>
-            <div class="md-toolbar-section-start">
-              <h1 class="md-title">Audio Files</h1>
-            </div>
-            <md-field md-clearable class="md-toolbar-section-end">
-              <md-input placeholder="Search by file name..." v-model="search" @input="searchOnTable"/>
-            </md-field>
-          </md-table-toolbar>
-          <md-table-empty-state
-            md-label="No users found"
-            :md-description="`No file found for this '${search}' query. Try a different search term or create a new file.`">
-          </md-table-empty-state>
-          <md-table-row slot="md-table-row" slot-scope="{ item }" @click.native="downloads(item.id)">
-            <md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
-            <md-table-cell md-label="Date" md-sort-by="date">{{ item.date }}</md-table-cell>
-            <md-table-cell md-label="Size" md-sort-by="size" md-numeric>{{ item.size }}</md-table-cell>
-          </md-table-row>
-        </md-table>
-      </md-card-content>
-    </div>
+    <md-card v-for="project in projects" :key="project.id">
+      <md-card-media-cover md-solid>
+        <md-card-media>
+          <canvas :ref="bindId(project.id)">{{ project.title }}</canvas>
+        </md-card-media>
+        <md-card-area>
+          <md-card-header>
+            <div class="md-title">{{ project.title }}</div>
+            <div class="md-subhead">{{ project.createAt }}</div>
+          </md-card-header>
+          <md-card-expand>
+            <md-card-actions md-alignment="space-between">
+              <div>
+                <md-button @click.native='setRoute("Thesis", project.id)'>Detail</md-button>
+              </div>
+              <md-card-expand-trigger>
+                <md-button>PLOT</md-button>
+              </md-card-expand-trigger>
+            </md-card-actions>
+            <md-card-expand-content>
+              <md-card-content>
+                {{ project.plot }}
+              </md-card-content>
+            </md-card-expand-content>
+          </md-card-expand>
+        </md-card-area>
+      </md-card-media-cover>
+    </md-card>
   </div>
-
 </template>
 
 <script>
-  import Peaks from 'peaks.js';
-
-  const AudioFileListURL = "";
-  const toLower = text => {
-    return text.toString().toLowerCase()
-  };
-
-  const searchByName = (items, term) => {
-    if (term) {
-      return items.filter(item => toLower(item.name).includes(toLower(term)))
-    }
-
-    return items
-  };
+  import PDFJS from 'pdfjs-dist';
+  import Constants from '../utils/Constants.json';
+  PDFJS.workerSrc = require('pdfjs-dist/build/pdf.worker');
 
   export default {
-    name: 'Main',
-    data() {
+    name: 'CardExpansion',
+    data: function () {
       return {
-        msg: 'Welcome to Your Vue.js App',
-        search: null,
-        searched: [],
-        users: [
-          {
-            id: 1,
-            name: 'test',
-            size: 'gsgs',
-            date: 111
-          }, {
-            id: 2,
-            name: 'test2',
-            size: 'gsgs2',
-            date: 111
-          }, {
-            id: 3,
-            name: 'test3',
-            size: 'gsgs3',
-            date: 111
-          }
-        ],
-        initial: 'vue-material-is-awesome.jpg',
-        single: null,
-        placeholder: null,
-        disabled: null,
-        multiple: null
+        showDialog: false,
+        project: {
+          id: null,
+          title: null,
+          plot: null,
+          file: null,
+          fileName: null,
+          mediaType: null
+        },
+        projects: [],
       }
     },
     methods: {
-      searchOnTable() {
-        this.searched = searchByName(this.users, this.search)
-      },
-      downloads: function (id) {
-        console.log(id);
-        this.http.get(AudioFileListURL + '/' + id)
+      setRoute(path, id) {
+        this.$router.push({name: path, params: {id: id}});
+      }, onFileChange(event) {
+        const file = event.target.files[0];
+        this.project.fileName = file.name;
+        this.project.mediaType = file.type;
+        let reader = new FileReader();
+        reader.onload = (e) => {
+          this.project.file = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }, saveProject() {
+        console.log(this.project);
+        this.$http.post(Constants.API_DOMAIN + "/prod/users/2/projects", this.project)
           .then((result) => {
             console.log(result);
+          })
+          .then(this.findLastProject)
+          .then(this.renderLastPdf);
+      }, clearForm() {
+        this.project.id = null;
+        this.project.title = null;
+        this.project.plot = null;
+        this.project.file = null;
+        this.project.fileName = null;
+        this.project.mediaType = null;
+      }, findProjects() {
+        return this.$http.get(Constants.API_DOMAIN + "/prod/users/2/projects")
+          .then((result) => {
+            console.log(result.body);
+            this.projects = result.body;
           });
-      },
-      play: function (event) {
-        this.$refs.audioref.play();
-      },
-      uploads: function (input) {
-        this.http.post(AudioFileListURL)
+      }, findLastProject: function () {
+        return this.$http.get(Constants.API_DOMAIN + '/prod/users/2/projects/last')
           .then((result) => {
             console.log(result);
+            this.project.id = result.body.id;
+            this.projects.push(result.body);
           });
-      }
+      }, renderLastPdf() {
+        let loadingTask = PDFJS.getDocument(this.project.file);
+        console.log(this.$refs[this.bindId(this.project.id)]);
+        let canvas = this.$refs[this.bindId(this.project.id)][0];
+        loadingTask.promise.then(function (pdfDocument) {
+          return pdfDocument.getPage(1).then(function (pdfPage) {
+            let viewport = pdfPage.getViewport(1.0);
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            let ctx = canvas.getContext('2d');
+            let renderTask = pdfPage.render({
+              canvasContext: ctx,
+              viewport: viewport
+            });
 
-    },
-    created() {
-      this.searched = this.users;
+            clearForm();
+            return renderTask.promise;
+          });
 
-      this.http.get(AudioFileListURL)
-        .then((result) => {
-          console.log(result);
+        }).catch(function (reason) {
+          console.error('Error: ' + reason);
         });
+      }, renderPdf() {
+        return this.projects.forEach((it) => {
+          this.$http.get(Constants.API_DOMAIN + "/prod/users/2/files/" + it.fileId)
+            .then((result) => {
+              let loadingTask = PDFJS.getDocument(result.body);
+              let canvas = this.$refs[this.bindId(it.id)][0];
+              loadingTask.promise.then(function (pdfDocument) {
+                return pdfDocument.getPage(1).then(function (pdfPage) {
+                  let viewport = pdfPage.getViewport(1.0);
+                  canvas.width = viewport.width;
+                  canvas.height = viewport.height;
+                  let ctx = canvas.getContext('2d');
+                  let renderTask = pdfPage.render({
+                    canvasContext: ctx,
+                    viewport: viewport
+                  });
+
+                  return renderTask.promise;
+                });
+
+              }).catch(function (reason) {
+                console.error('Error: ' + reason);
+              });
+            });
+        });
+      }, bindId: function (item) {
+        return '#' + item;
+      }
     },
     mounted() {
-      const myAudioContext = new AudioContext();
-
-      const option = {
-        mediaElement: this.$refs.audioref,
-        container: this.$refs.peaksref,
-        audioContext: myAudioContext,
-        height: 200,
-        zoomLevels: [8]
-      };
-
-      var p = Peaks.init(option);
-    }
+      this.findProjects()
+        .then(this.renderPdf);
+    },
   }
 </script>
 
 <style lang="scss" scoped>
-  @import "~vue-material/src/components/MdAnimation/variables";
-  @import "~vue-material/src/theme/engine";
-
-  .md-content {
-    width: 200px;
-    height: 200px;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    margin-top: 60px;
+  .card-expansion {
+    height: 480px;
   }
 
-  .md-layout-item {
-    height: 40px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    transition: .3s $md-transition-stand-timing;
-
-    &:after {
-      width: 100%;
-      height: 100%;
-      display: block;
-      /*background: md-get-palette-color(purple, 200);*/
-    }
+  .md-card {
+    width: 320px;
+    margin: 4px;
+    display: inline-block;
+    vertical-align: top;
   }
 
-  .md-field {
-    max-width: 300px;
-  }
-
-  .md-table {
-    height: 100%;
+  .md-dialog {
+    max-width: 768px;
   }
 </style>

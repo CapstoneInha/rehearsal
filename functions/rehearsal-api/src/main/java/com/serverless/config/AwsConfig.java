@@ -16,7 +16,7 @@ public class AwsConfig {
                 this
                         .getClass()
                         .getClassLoader()
-                        .getResourceAsStream("app.properties")
+                        .getResourceAsStream("aws.properties")
         );
 
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(propertiesCredentials.getAWSAccessKeyId(), propertiesCredentials.getAWSSecretKey());

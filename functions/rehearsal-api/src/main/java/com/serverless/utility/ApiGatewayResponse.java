@@ -1,10 +1,12 @@
 package com.serverless.utility;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,6 +52,11 @@ public class ApiGatewayResponse {
 		private static final Logger LOG = Logger.getLogger(ApiGatewayResponse.Builder.class);
 
 		private static final ObjectMapper objectMapper = new ObjectMapper();
+
+		static {
+			objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+			objectMapper.registerModule(new JavaTimeModule());
+		}
 
 		private int statusCode = 200;
 		private Map<String, String> headers = Collections.emptyMap();
@@ -121,7 +128,7 @@ public class ApiGatewayResponse {
 					throw new RuntimeException(e);
 				}
 			} else if (binaryBody != null) {
-				body = new String(Base64.getEncoder().encode(binaryBody), StandardCharsets.UTF_8);
+				body = Base64.encodeBase64String(binaryBody);
 			}
 			return new ApiGatewayResponse(statusCode, body, headers, base64Encoded);
 		}
