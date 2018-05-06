@@ -3,20 +3,17 @@
 
 ### Custrom by KOSEUNGBIN
 # Electron
-electron-front/node_modules/
-electron-front/src/dist/
-electron-front/.compilerc
-electron-front/.eslintrc
-electron-front/package.json
-electron-front/package-lock.json
+front/electron/node_modules/
+front/electron/src/dist/
+front/electron/.eslintrc
+front/electron/package.json
+front/electron/package-lock.json
 
 # Front
 front/node_modules/
 front/static/.gitkeep
 front/package.json
 front/package-lock.json
-front/.babelrc
-front/.postcssrc.js
 front/test/unit/.eslintrc
 front/.DS_Store
 front/node_modules/
@@ -136,7 +133,7 @@ hs_err_pid*
 
 ### Gradle ###
 .gradle
-**/build/
+functions/**/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting

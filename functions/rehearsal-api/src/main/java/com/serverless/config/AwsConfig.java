@@ -9,23 +9,23 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import java.io.IOException;
 
 public class AwsConfig {
-    private AmazonS3 s3Client;
+    private static AmazonS3 s3Client;
 
-    public AwsConfig() throws IOException {
-        PropertiesCredentials propertiesCredentials = new PropertiesCredentials(
-                this
-                        .getClass()
-                        .getClassLoader()
-                        .getResourceAsStream("aws.properties")
-        );
+    public AmazonS3 getS3Client() throws IOException {
+        if (s3Client == null) {
+            PropertiesCredentials propertiesCredentials = new PropertiesCredentials(
+                    this
+                            .getClass()
+                            .getClassLoader()
+                            .getResourceAsStream("aws.properties")
+            );
 
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials(propertiesCredentials.getAWSAccessKeyId(), propertiesCredentials.getAWSSecretKey());
-        s3Client = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .build();
-    }
+            BasicAWSCredentials awsCreds = new BasicAWSCredentials(propertiesCredentials.getAWSAccessKeyId(), propertiesCredentials.getAWSSecretKey());
+            s3Client = AmazonS3ClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                    .build();
+        }
 
-    public AmazonS3 getS3Client() {
         return s3Client;
     }
 

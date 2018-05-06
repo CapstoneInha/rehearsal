@@ -1,20 +1,17 @@
-package com.serverless.utility;
+package com.serverless.utility.template;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.serverless.config.AwsConfig;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class S3Template {
     private AmazonS3 amazonS3;
     private static final String BUCKET_NAME = "www.rehearsal-api.com";
-
 
     public S3Template() throws IOException {
         amazonS3 = new AwsConfig().getS3Client();
@@ -31,4 +28,5 @@ public class S3Template {
         S3ObjectInputStream in = object.getObjectContent();
         return IOUtils.toByteArray(in);
     }
+
 }

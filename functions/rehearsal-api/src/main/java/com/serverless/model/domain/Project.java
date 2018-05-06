@@ -11,7 +11,6 @@ public class Project {
     private String title;
     private String plot;
     private State state;
-    private long fileId;
     private long memberId;
     private LocalDateTime createAt;
 
@@ -59,14 +58,6 @@ public class Project {
         this.state = state;
     }
 
-    public long getFileId() {
-        return fileId;
-    }
-
-    public void setFileId(long fileId) {
-        this.fileId = fileId;
-    }
-
     public long getMemberId() {
         return memberId;
     }
@@ -82,4 +73,5 @@ public class Project {
     public void setCreateAt(LocalDateTime createAt) {
         this.createAt = createAt;
     }
+
 }

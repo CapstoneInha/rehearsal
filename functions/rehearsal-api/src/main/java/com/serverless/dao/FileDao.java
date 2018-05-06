@@ -4,70 +4,52 @@ import com.serverless.config.DriverConfig;
 import com.serverless.model.domain.File;
 import com.serverless.sql.FileSQL;
 import com.serverless.utility.enums.MediaType;
+import com.serverless.utility.template.JdbcTemplate;
 import org.apache.commons.lang3.StringUtils;
 
-import java.sql.*;
-import java.time.ZoneOffset;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.serverless.utility.template.JdbcTemplate.createJdbcTemplate;
 
 
 public class FileDao {
+    private static FileDao fileDao;
+    private JdbcTemplate jdbcTemplate;
 
-    public FileDao() {
+    private FileDao() {
+        jdbcTemplate = createJdbcTemplate();
     }
+
+    public static FileDao createFileDao() {
+        if (fileDao == null) {
+            fileDao = new FileDao();
+        }
+
+        return fileDao;
+    }
+
 
     public long create(File file) throws SQLException {
-        Connection connection = DriverConfig.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(FileSQL.CREATE_FILES, Statement.RETURN_GENERATED_KEYS);
-        ResultSet resultSet = null;
-        try {
-            preparedStatement.setString(1, file.getName());
-            preparedStatement.setString(2, file.getMediaType().name());
-            preparedStatement.setLong(3, file.getSize());
-            preparedStatement.setDate(4, new Date(file.getCreatedAt().toEpochSecond(ZoneOffset.UTC)));
-            preparedStatement.setDate(5, new Date(file.getUpdatedAt().toEpochSecond(ZoneOffset.UTC)));
-            preparedStatement.setLong(6, file.getMemberId());
-            preparedStatement.executeUpdate();
-            resultSet = preparedStatement.getGeneratedKeys();
-            resultSet.next();
-            return resultSet.getLong(1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            resultSet.close();
-            preparedStatement.close();
-            connection.close();
-        }
-
-        return -1;
+        Connection con = jdbcTemplate.getConnection();
+        con.setAutoCommit(false);
+        long fileId = jdbcTemplate.create(con, FileSQL.CREATE_FILES, File.class);
+        con.commit();
+        jdbcTemplate.close(con);
+        return fileId;
     }
 
-    public Optional<List<File>> find(long userId) {
-        try {
-            Connection connection = DriverConfig.getConnection();
-            Statement statement = connection.createStatement();
-            List<File> files = new LinkedList<>();
-            ResultSet resultSet = statement.executeQuery(FileSQL.FIND_FILES_BY_PROJECT_ID + userId);
-            while (resultSet.next()) {
-                File file = new File();
-                file.setId(resultSet.getLong("id"));
-                file.setName(resultSet.getString("name"));
-                file.setSize(resultSet.getLong("size"));
-                file.setCreatedAt(resultSet.getTimestamp("created_at").toLocalDateTime());
-                file.setUpdatedAt(resultSet.getTimestamp("updated_at").toLocalDateTime());
-                file.setMemberId(resultSet.getLong("member_id"));
-                files.add(file);
-            }
-
-            resultSet.close();
-            statement.close();
-            connection.close();
-            return Optional.of(files);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public Optional<List<File>> find(long userId) throws SQLException {
+        Connection con = jdbcTemplate.getConnection();
+        con.setAutoCommit(false);
+        Map<Object, Object> params = Collections.synchronizedMap(new LinkedHashMap<>());
+        long fileId = jdbcTemplate.find(con, FileSQL.FIND_FILES_BY_PROJECT_ID, File.class);
+        con.commit();
+        jdbcTemplate.close(con);
 
         return Optional.empty();
     }
@@ -98,13 +80,12 @@ public class FileDao {
         return Optional.empty();
     }
 
-    public Optional<File> findLastOne(long projectId) {
+    public Optional<File> findLastOne(Connection connection, long projectId) {
         try {
-            Connection connection = DriverConfig.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(StringUtils.replace(FileSQL.FIND_LAST_FILE_BY_PROJECT_ID, "#id", String.valueOf(projectId)));
             File file = null;
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 file = new File();
                 file.setId(resultSet.getLong("id"));
                 file.setName(resultSet.getString("name"));
@@ -124,4 +105,5 @@ public class FileDao {
 
         return Optional.empty();
     }
+
 }

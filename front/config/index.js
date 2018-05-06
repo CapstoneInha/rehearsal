@@ -38,10 +38,10 @@ module.exports = {
 
   build: {
     // Template for index.html
-    index: path.resolve(__dirname, '../../electron-front/src/dist/index.html'),
+    index: path.resolve(__dirname, '../electron/src/dist/index.html'),
 
     // Paths
-    assetsRoot: path.resolve(__dirname, '../../electron-front/src/dist'),
+    assetsRoot: path.resolve(__dirname, '../electron/src/dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
 

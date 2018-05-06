@@ -1,10 +1,8 @@
 package com.serverless.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.serverless.model.dto.FileDto;
 import com.serverless.utility.enums.MediaType;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +16,18 @@ public class File {
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
+
+    public File() {
+    }
+
+    public File(FileDto fileDto) {
+        this.id = fileDto.getId();
+        this.name = fileDto.getName();
+        this.size = fileDto.getSize();
+        this.mediaType = fileDto.getMediaType();
+        this.createdAt = fileDto.getCreatedAt();
+        this.updatedAt = fileDto.getUpdatedAt();
+    }
 
     public long getId() {
         return id;
@@ -75,48 +85,4 @@ public class File {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public String toString() {
-        return "File{" +
-                "id=" + id +
-                ", name='" + name  +
-                ", mediaType" + mediaType +
-                ", size=" + size +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", memberId=" + memberId +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (!(o instanceof File)) return false;
-
-        File file = (File) o;
-
-        return new EqualsBuilder()
-                .append(getId(), file.getId())
-                .append(getMediaType(), file.getMediaType())
-                .append(getSize(), file.getSize())
-                .append(getName(), file.getName())
-                .append(getCreatedAt(), file.getCreatedAt())
-                .append(getUpdatedAt(), file.getUpdatedAt())
-                .append(getMemberId(), file.getMemberId())
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getId())
-                .append(getName())
-                .append(getMediaType())
-                .append(getSize())
-                .append(getCreatedAt())
-                .append(getUpdatedAt())
-                .append(getMemberId())
-                .toHashCode();
-    }
 }

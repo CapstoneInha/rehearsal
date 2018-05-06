@@ -1,8 +1,7 @@
 package com.serverless.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import com.serverless.utility.enums.MediaType;
 
 import java.time.LocalDateTime;
 
@@ -10,11 +9,13 @@ public class FileDto {
     private long id;
     private String name;
     private long size;
+    private long memberId;
+    private String data;
+    private MediaType mediaType;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-    private long userId;
 
     public long getId() {
         return id;
@@ -40,6 +41,30 @@ public class FileDto {
         this.size = size;
     }
 
+    public long getMemberId() {
+        return memberId;
+    }
+
+    public void setMemberId(long memberId) {
+        this.memberId = memberId;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(MediaType mediaType) {
+        this.mediaType = mediaType;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -54,55 +79,5 @@ public class FileDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
-
-    @Override
-    public String toString() {
-        return "File{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", size=" + size +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", userId=" + userId +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (!(o instanceof FileDto)) return false;
-
-        FileDto file = (FileDto) o;
-
-        return new EqualsBuilder()
-                .append(getId(), file.getId())
-                .append(getSize(), file.getSize())
-                .append(getName(), file.getName())
-                .append(getCreatedAt(), file.getCreatedAt())
-                .append(getUpdatedAt(), file.getUpdatedAt())
-                .append(getUserId(), file.getUserId())
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getId())
-                .append(getName())
-                .append(getSize())
-                .append(getCreatedAt())
-                .append(getUpdatedAt())
-                .append(getUserId())
-                .toHashCode();
     }
 }

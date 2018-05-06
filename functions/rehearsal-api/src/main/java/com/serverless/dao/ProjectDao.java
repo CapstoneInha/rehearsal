@@ -1,6 +1,5 @@
 package com.serverless.dao;
 
-import com.serverless.config.DriverConfig;
 import com.serverless.model.domain.Project;
 import com.serverless.sql.ProjectSQL;
 import com.serverless.utility.enums.State;
@@ -13,12 +12,20 @@ import java.util.List;
 import java.util.Optional;
 
 public class ProjectDao {
+    private static ProjectDao projectDao;
 
-    public ProjectDao() {
+    private ProjectDao() {
     }
 
-    public long create(Project project) throws SQLException {
-        Connection connection = DriverConfig.getConnection();
+    public static ProjectDao createProjectDao() {
+        if (projectDao == null) {
+            projectDao = new ProjectDao();
+        }
+
+        return projectDao;
+    }
+
+    public long create(Connection connection, Project project) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement(ProjectSQL.CREATE_PROJECTS, Statement.RETURN_GENERATED_KEYS);
         ResultSet resultSet = null;
         try {
@@ -36,15 +43,13 @@ public class ProjectDao {
         } finally {
             resultSet.close();
             preparedStatement.close();
-            connection.close();
         }
 
         return -1;
     }
 
-    public Optional<List<Project>> findProjects(int memberId) {
+    public Optional<List<Project>> find(Connection connection, long memberId) {
         try {
-            Connection connection = DriverConfig.getConnection();
             Statement statement = connection.createStatement();
             List<Project> projects = new LinkedList<>();
             ResultSet resultSet = statement.executeQuery(ProjectSQL.FIND_PROJECTS_BY_USER_ID + memberId);
@@ -62,7 +67,6 @@ public class ProjectDao {
 
             resultSet.close();
             statement.close();
-            connection.close();
             return Optional.of(projects);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -71,8 +75,7 @@ public class ProjectDao {
         return Optional.empty();
     }
 
-    public Optional<Project> findProject(int projectId) throws SQLException {
-        Connection connection = DriverConfig.getConnection();
+    public Optional<Project> findOne(Connection connection, long projectId) throws SQLException {
         Statement statement = null;
         ResultSet resultSet = null;
         try {
@@ -92,7 +95,6 @@ public class ProjectDao {
 
             resultSet.close();
             statement.close();
-            connection.close();
             return Optional.of(project);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -102,8 +104,7 @@ public class ProjectDao {
     }
 
 
-    public Optional<Project> findLastProjectByMemberId(int memberId) throws SQLException {
-        Connection connection = DriverConfig.getConnection();
+    public Optional<Project> findLastProjectByMemberId(Connection connection, int memberId) throws SQLException {
         Statement statement = null;
         ResultSet resultSet = null;
         try {
@@ -123,7 +124,6 @@ public class ProjectDao {
 
             resultSet.close();
             statement.close();
-            connection.close();
             return Optional.of(project);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -131,6 +131,7 @@ public class ProjectDao {
 
         return Optional.empty();
     }
+
 }
 
 

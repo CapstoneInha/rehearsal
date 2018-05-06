@@ -1,6 +1,5 @@
 package com.serverless.dao;
 
-import com.serverless.config.DriverConfig;
 import com.serverless.model.domain.History;
 import com.serverless.sql.HistorySQL;
 
@@ -11,12 +10,20 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 
 public class HistoryDao {
+    private static HistoryDao historyDao;
 
-    public HistoryDao() {
+    private HistoryDao() {
     }
 
-    public long create(History history) throws SQLException {
-        Connection connection = DriverConfig.getConnection();
+    public static HistoryDao createHistoryDao() {
+        if (historyDao == null) {
+            historyDao = new HistoryDao();
+        }
+
+        return historyDao;
+    }
+
+    public long create(Connection connection, History history) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(HistorySQL.CREATE_HISTORY);
         long insertId = 11;
         try {
@@ -30,7 +37,6 @@ public class HistoryDao {
             e.printStackTrace();
         } finally {
             statement.close();
-            connection.close();
         }
 
         return insertId;
