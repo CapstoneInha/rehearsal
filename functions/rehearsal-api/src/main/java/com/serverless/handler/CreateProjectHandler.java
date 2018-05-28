@@ -1,7 +1,7 @@
 package com.serverless.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.serverless.model.dto.ProjectDto;
+import com.serverless.model.dto.ProjectRequest;
 import com.serverless.service.ProjectService;
 import com.serverless.utility.filter.ApiGatewayRequest;
 import com.serverless.utility.filter.ApiGatewayResponse;
@@ -22,8 +22,8 @@ public class CreateProjectHandler extends ApiGatewayRequest {
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         LOG.info(input);
-        ProjectDto projectDto = getBody(input, ProjectDto.class);
-        projectService.create(projectDto, getPathParams(input));
+        ProjectRequest projectDto = getBody(input, ProjectRequest.class);
+        projectService.create(projectDto);
         return ApiGatewayResponse.builder()
                 .setStatusCode(201)
                 .build();

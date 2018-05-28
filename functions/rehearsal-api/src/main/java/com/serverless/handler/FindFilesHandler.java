@@ -1,9 +1,8 @@
 package com.serverless.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.serverless.model.domain.Project;
-import com.serverless.model.dto.ProjectResponse;
-import com.serverless.service.ProjectService;
+import com.serverless.model.domain.File;
+import com.serverless.service.FileService;
 import com.serverless.utility.filter.ApiGatewayRequest;
 import com.serverless.utility.filter.ApiGatewayResponse;
 import org.apache.http.HttpStatus;
@@ -13,25 +12,25 @@ import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 import java.util.Map;
 
-import static com.serverless.service.ProjectService.createProjectService;
+import static com.serverless.service.FileService.createFileService;
 
-public class FindProjectsHandler extends ApiGatewayRequest {
-    private static final Logger LOG = Logger.getLogger(FindProjectsHandler.class);
-    private ProjectService projectService;
+public class FindFilesHandler extends ApiGatewayRequest {
+    private static final Logger LOG = Logger.getLogger(FindFilesHandler.class);
+    private FileService fileService;
 
-    public FindProjectsHandler() {
-        projectService = createProjectService();
+    public FindFilesHandler() {
+        fileService = createFileService();
     }
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-        Map<String, String> params = getPathParams(input);
+        Map pathParameters = getPathParams(input);
         ApiGatewayResponse response;
         try {
-            List<ProjectResponse> projects = projectService.find(Long.parseLong(params.get("memberId")));
+            List<File> files = fileService.find(Long.parseLong(pathParameters.get("projectId").toString()));
             response = ApiGatewayResponse.builder()
                     .setStatusCode(HttpStatus.SC_OK)
-                    .setObjectBody(projects)
+                    .setObjectBody(files)
                     .build();
         } catch (SQLSyntaxErrorException e) {
             response = ApiGatewayResponse.builder()

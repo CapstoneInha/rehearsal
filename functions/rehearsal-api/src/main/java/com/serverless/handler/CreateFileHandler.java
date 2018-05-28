@@ -21,6 +21,7 @@ public class CreateFileHandler extends ApiGatewayRequest {
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
+        LOG.info(input.toString());
         FileDto fileDto = getBody(input, FileDto.class);
         fileService.create(fileDto, getPathParams(input));
         return ApiGatewayResponse.builder()
