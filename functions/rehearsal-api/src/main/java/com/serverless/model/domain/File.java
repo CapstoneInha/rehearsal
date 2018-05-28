@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class File {
     private long id;
     private String name;
-    private MediaType mediaType;
+    private String mediaType;
     private long size;
     private long memberId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -45,11 +45,11 @@ public class File {
         this.name = name;
     }
 
-    public MediaType getMediaType() {
+    public String getMediaType() {
         return mediaType;
     }
 
-    public void setMediaType(MediaType mediaType) {
+    public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
     }
 

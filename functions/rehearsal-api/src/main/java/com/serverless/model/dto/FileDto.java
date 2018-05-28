@@ -11,7 +11,7 @@ public class FileDto {
     private long size;
     private long memberId;
     private String data;
-    private MediaType mediaType;
+    private String mediaType;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -57,11 +57,11 @@ public class FileDto {
         this.data = data;
     }
 
-    public MediaType getMediaType() {
+    public String getMediaType() {
         return mediaType;
     }
 
-    public void setMediaType(MediaType mediaType) {
+    public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
     }
 
