@@ -14,6 +14,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "fs": "0.0.1-security",
+    "moment": "^2.22.1",
     "pdfjs-dist": "^2.0.489",
     "peaks.js": "^0.9.8",
     "vue": "^2.5.2",
