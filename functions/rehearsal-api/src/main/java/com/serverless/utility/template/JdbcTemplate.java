@@ -14,51 +14,52 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JdbcTemplate {
-    private static JdbcTemplate jdbcTemplate;
+    private Connection connection;
 
-    private JdbcTemplate() {
+    public JdbcTemplate() throws SQLException {
+        this.connection = DriverManager.getConnection(Constants.JDBC_URL, Constants.USER_NAME, Constants.PASSWORD);
+        this.connection.setAutoCommit(false);
     }
 
-    public static JdbcTemplate createJdbcTemplate() {
-        if (jdbcTemplate == null) {
-            jdbcTemplate = new JdbcTemplate();
-        }
-
-        return jdbcTemplate;
+    public void batchUpdate() throws SQLException {
+        this.connection.commit();
     }
 
-    public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(Constants.JDBC_URL, Constants.USER_NAME, Constants.PASSWORD);
-    }
-
-    public <T> long create(Connection connection, String sql, T object) {
+    public <T> long create(String sql, T object) {
         Class clazz = object.getClass();
         Field[] fileds = clazz.getDeclaredFields();
         try {
             for (Field field : fileds) {
-                sql.replaceAll(":" + field.getName(), field.get(object).toString());
+                System.out.println("field : " + field.getName());
+                Method method = clazz.getMethod("get" + field.getName().toUpperCase().charAt(0) + field.getName().substring(1));
+                if(field.getType().isPrimitive()) {
+                    sql = sql.replaceAll(":" + field.getName(), String.valueOf(method.invoke(object)));
+                } else {
+                    sql = sql.replaceAll(":" + field.getName(), StringUtils.wrapIfMissing(String.valueOf(method.invoke(object)), "\""));
+                }
             }
+
+            System.out.println(sql);
 
             ResultSet resultSet;
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
-            resultSet.next();
-            return resultSet.getLong(1);
-        } catch (SQLException | IllegalAccessException e) {
+            if(resultSet.next()) return resultSet.getLong(1);
+        } catch (SQLException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
 
         return -1L;
     }
 
-    public <T> LinkedList<T> find(Connection connection, String sql, Map<String, Object> param, Class<T> resultType) throws SQLException {
-        param.forEach((key, value) -> {
-            sql.replaceAll(":" + key, value.toString());
-        });
+    public <T> LinkedList<T> find(String sql, Map<String, Object> param, Class<T> resultType) throws SQLException {
+        for (String key : param.keySet()) {
+            sql = sql.replaceAll(":" + key, param.get(key).toString());
+        }
+        System.out.println(sql);
 
-        Class clazz = resultType.getClass();
-        Field[] fileds = clazz.getDeclaredFields();
+        Field[] fileds = resultType.getDeclaredFields();
         LinkedList<Triple<String, String, Class>> fieldList = new LinkedList<>();
         for (Field field : fileds) {
             String schema = Arrays.stream(StringUtils.splitByCharacterTypeCamelCase(field.getName()))
@@ -80,7 +81,7 @@ public class JdbcTemplate {
             while (resultSet.next()) {
                 T object = resultType.newInstance();
                 for (Triple<String, String, Class> field : fieldList) {
-                    Method method = clazz.getDeclaredMethod(field.getMiddle(), field.getRight());
+                    Method method = resultType.getDeclaredMethod(field.getMiddle(), field.getRight());
                     method.invoke(object, resultSet.getObject(field.getLeft(), field.getRight()));
                 }
 
@@ -98,7 +99,7 @@ public class JdbcTemplate {
         return resultList;
     }
 
-    public boolean close(Connection connection) {
+    public boolean close() {
         if (connection == null) {
             try {
                 connection.close();
