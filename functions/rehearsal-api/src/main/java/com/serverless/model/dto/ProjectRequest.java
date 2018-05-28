@@ -1,29 +1,21 @@
-package com.serverless.model.domain;
+package com.serverless.model.dto;
 
-import com.serverless.model.dto.ProjectRequest;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.serverless.utility.enums.MediaType;
+import com.serverless.utility.enums.State;
 
 import java.time.LocalDateTime;
 
-public class Project {
+public class ProjectRequest {
     private long id;
     private String title;
     private String plot;
     private String state;
-    private long memberId;
+    private String file;
     private String fileName;
+    private long memberId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createAt;
-
-    public Project() {
-    }
-
-    public Project(ProjectRequest projectDto) {
-        this.id = projectDto.getId();
-        this.title = projectDto.getTitle();
-        this.plot = projectDto.getTitle();
-        this.state = projectDto.getState();
-        this.memberId = projectDto.getMemberId();
-        this.createAt = projectDto.getCreateAt();
-    }
 
     public long getId() {
         return id;
@@ -57,12 +49,12 @@ public class Project {
         this.state = state;
     }
 
-    public long getMemberId() {
-        return memberId;
+    public String getFile() {
+        return file;
     }
 
-    public void setMemberId(long memberId) {
-        this.memberId = memberId;
+    public void setFile(String file) {
+        this.file = file;
     }
 
     public String getFileName() {
@@ -71,6 +63,14 @@ public class Project {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public long getMemberId() {
+        return memberId;
+    }
+
+    public void setMemberId(long memberId) {
+        this.memberId = memberId;
     }
 
     public LocalDateTime getCreateAt() {

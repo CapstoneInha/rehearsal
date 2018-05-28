@@ -2,7 +2,7 @@ package com.serverless.sql
 
 class ProjectSQL {
     public static final String FIND_PROJECTS_BY_USER_ID = '''
-        SELECT p.*, f.id as file_id
+        SELECT p.*, f.name as file_name
         FROM PROJECTS p
         LEFT JOIN HISTORIES h on h.project_id = p.id and h.event_type = 'CREATE_PROJECT'
         LEFT JOIN FILES f on f.id = h.file_id
@@ -10,11 +10,11 @@ class ProjectSQL {
     '''
 
     public static final String FIND_PROJECT_BY_ID = '''
-        SELECT p.*, f.id as file_id
+        SELECT p.*, f.name as file_name
         FROM PROJECTS p
         LEFT JOIN HISTORIES h on h.project_id = p.id and h.event_type = 'CREATE_PROJECT'
         LEFT JOIN FILES f on f.id = h.file_id
-        WHERE p.id = :id
+        WHERE p.id = :projectId
     '''
 
     public static final String FIND_LAST_PROJECT_BY_MEMBER_ID = '''

@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import App from './App.vue'
-import Base from '@/components/Base'
-import Thesis from '@/components/Thesis'
+import Project from './components/Projects/ProjectBase.vue'
+import Thesis from './components/Theses/ThesisBase.vue'
 import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default-dark.css'
@@ -17,6 +17,7 @@ Vue.use(MdContent);
 Vue.use(MdTabs);
 Vue.use(VueMaterial);
 Vue.use(VueResource);
+
 Vue.config.productionTip = false;
 
 const router = new Router({
@@ -24,12 +25,12 @@ const router = new Router({
   routes: [
     {
       path: '*',
-      name: 'Base',
-      component: Base
+      name: 'ProjectBase',
+      component: Project
     },
     {
       path: '/thesis/:id',
-      name: 'Thesis',
+      name: 'ThesisBase',
       component: Thesis
     }
   ]

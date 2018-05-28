@@ -1,20 +1,19 @@
 package com.serverless.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.serverless.utility.enums.MediaType;
-import com.serverless.utility.enums.State;
 
 import java.time.LocalDateTime;
 
-public class ProjectDto {
+/**
+ * Created by koseungbin on 2018. 5. 27.
+ */
+
+public class ProjectResponse {
     private long id;
     private String title;
     private String plot;
-    private State state;
-    private String file;
-    private String fileName;
-    private String mediaType;
-    private long memberId;
+    private String state;
+    private String imagePath;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createAt;
 
@@ -42,44 +41,20 @@ public class ProjectDto {
         this.plot = plot;
     }
 
-    public State getState() {
+    public String getState() {
         return state;
     }
 
-    public void setState(State state) {
+    public void setState(String state) {
         this.state = state;
     }
 
-    public String getFile() {
-        return file;
+    public String getImagePath() {
+        return imagePath;
     }
 
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public void setMediaType(String mediaType) {
-        this.mediaType = mediaType;
-    }
-
-    public long getMemberId() {
-        return memberId;
-    }
-
-    public void setMemberId(long memberId) {
-        this.memberId = memberId;
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public LocalDateTime getCreateAt() {

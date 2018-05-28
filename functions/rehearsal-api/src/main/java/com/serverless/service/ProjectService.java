@@ -6,23 +6,26 @@ import com.serverless.dao.ProjectDao;
 import com.serverless.model.domain.File;
 import com.serverless.model.domain.History;
 import com.serverless.model.domain.Project;
-import com.serverless.model.dto.ProjectDto;
+import com.serverless.model.dto.ProjectRequest;
+import com.serverless.model.dto.ProjectResponse;
+import com.serverless.utility.Constants;
 import com.serverless.utility.enums.EventType;
-import com.serverless.utility.enums.MediaType;
-import com.serverless.utility.enums.State;
 import com.serverless.utility.template.S3Template;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-
-import static com.serverless.utility.template.JdbcTemplate.getConnection;
+import java.util.stream.Collectors;
 
 public class ProjectService {
+    private static final Logger LOG = Logger.getLogger(ProjectService.class);
     private static ProjectService projectService;
     private ProjectDao projectDao;
     private HistoryDao historyDao;
@@ -42,72 +45,80 @@ public class ProjectService {
         return projectService;
     }
 
-    public void create(ProjectDto projectDto, Map<String, String> pathParams) {
-        Connection connection = null;
+    public void create(ProjectRequest projectDto) {
         try {
-            connection = getConnection();
-            connection.setAutoCommit(false);
-            projectDto.setState(State.NOTYET);
+            // TODO: 2018. 5. 27. memberId = 2 임시값, 세션 적용필요
+            long memberId = 2;
+            projectDto.setMemberId(memberId);
+            projectDto.setState("NOTYET");
             projectDto.setCreateAt(LocalDateTime.now());
-            projectDto.setMemberId(Integer.parseInt(pathParams.get("memberId")));
-            long projectId = projectDao.create(connection, new Project(projectDto));
+            long projectId = projectDao.create(new Project(projectDto));
+            String mediaType = StringUtils.substringBetween(projectDto.getFile(), "data:", ";base64,");
+            String fileData = StringUtils.substringAfter(projectDto.getFile(), ";base64,");
             S3Template template = new S3Template();
-            long fileSize = template.upload(projectDto.getMemberId() + "/" + projectDto.getFileName(), projectDto.getFile());
+            long fileSize = template.upload(projectDto.getMemberId() + "/" + projectDto.getFileName(), fileData, mediaType);
 
             Project project = new Project(projectDto);
             project.setId(projectId);
 
             File file = new File();
-            file.setMemberId(Integer.parseInt(pathParams.get("memberId")));
+            file.setMemberId(memberId);
             file.setName(projectDto.getFileName());
             file.setUpdatedAt(LocalDateTime.now());
             file.setCreatedAt(LocalDateTime.now());
             file.setSize(fileSize);
-            file.setMediaType(MediaType.parse(projectDto.getMediaType()));
+            file.setMediaType("application/pdf");
 
-            long fileId = fileDao.create(connection, file);
+            long fileId = fileDao.create(file);
 
             History history = new History();
             history.setFileId(fileId);
             history.setProjectId(projectId);
             history.setCreateAt(LocalDateTime.now());
             history.setEventType(EventType.CREATE_PROJECT);
-            historyDao.create(connection, history);
-
-            connection.commit();
-            connection.setAutoCommit(true);
-            connection.close();
+            historyDao.create(history);
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
 
     }
 
-    public Optional<Project> findOne(long projectId) {
-        Connection connection = null;
+    public ProjectResponse findOne(long projectId) throws SQLSyntaxErrorException {
         try {
-            connection = getConnection();
-            Optional<Project> project = projectDao.findOne(connection, projectId);
-            connection.close();
-            return project;
+            Project project = projectDao.findOne(projectId).orElseThrow(IllegalArgumentException::new);
+            ProjectResponse projectResponse = new ProjectResponse();
+            projectResponse.setId(project.getId());
+            projectResponse.setTitle(project.getTitle());
+            projectResponse.setPlot(project.getPlot());
+            projectResponse.setState(project.getState());
+            projectResponse.setCreateAt(project.getCreateAt());
+            projectResponse.setImagePath(Constants.S3_URL + project.getMemberId() + "/" + project.getFileName());
+            return projectResponse;
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
+            throw new SQLSyntaxErrorException("잘못된 요청입니다.");
         }
 
-        return Optional.empty();
     }
 
-    public Optional<List<Project>> find(long memberId) {
+    public List<ProjectResponse> find(long memberId) throws SQLSyntaxErrorException {
         try {
-            Connection connection = getConnection();
-            Optional<List<Project>> projects = projectDao.find(connection, memberId);
-            connection.close();
-            return projects;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            List<Project> projects = projectDao.find(memberId).orElseThrow(IllegalArgumentException::new);
+            return projects.stream().map(project -> {
+                ProjectResponse projectResponse = new ProjectResponse();
+                projectResponse.setId(project.getId());
+                projectResponse.setTitle(project.getTitle());
+                projectResponse.setPlot(project.getPlot());
+                projectResponse.setState(project.getState());
+                projectResponse.setCreateAt(project.getCreateAt());
+                projectResponse.setImagePath(Constants.S3_URL + project.getMemberId() + "/" + project.getFileName());
+                return projectResponse;
+            }).collect(Collectors.toList());
 
-        return Optional.empty();
+        } catch (SQLException e) {
+            LOG.error(e);
+            throw new SQLSyntaxErrorException("잘못된 요청입니다.");
+        }
     }
 
 }
