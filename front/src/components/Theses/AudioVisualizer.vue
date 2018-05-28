@@ -5,7 +5,6 @@
     <audio ref="audio" :src="audioPath" preload="auto">
       <source type="audio/ogg">
     </audio>
-    <script src="bower_components/requirejs/require.js" data-main="app.js"></script>
     <md-card-actions>
       <md-button @click="play">Click Me to Play Sound</md-button>
     </md-card-actions>

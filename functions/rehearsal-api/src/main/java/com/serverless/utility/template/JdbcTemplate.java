@@ -53,6 +53,28 @@ public class JdbcTemplate {
         return -1L;
     }
 
+    public <T> void update(String sql, T object) {
+        Class clazz = object.getClass();
+        Field[] fileds = clazz.getDeclaredFields();
+        try {
+            for (Field field : fileds) {
+                System.out.println("field : " + field.getName());
+                Method method = clazz.getMethod("get" + field.getName().toUpperCase().charAt(0) + field.getName().substring(1));
+                if(field.getType().isPrimitive()) {
+                    sql = sql.replaceAll(":" + field.getName(), String.valueOf(method.invoke(object)));
+                } else {
+                    sql = sql.replaceAll(":" + field.getName(), StringUtils.wrapIfMissing(String.valueOf(method.invoke(object)), "\""));
+                }
+            }
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.executeUpdate();
+        } catch (SQLException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public <T> LinkedList<T> find(String sql, Map<String, Object> param, Class<T> resultType) throws SQLException {
         for (String key : param.keySet()) {
             sql = sql.replaceAll(":" + key, param.get(key).toString());

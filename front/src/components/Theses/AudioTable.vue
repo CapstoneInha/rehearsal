@@ -15,7 +15,7 @@
               md-label="No audio file found"
               :md-description="`No file found for this '${search}' query. Try a different search term or create a new file.`">
             </md-table-empty-state>
-            <md-table-row slot="md-table-row" slot-scope="{ item }" @click.native="loadFild(item)">
+            <md-table-row slot="md-table-row" slot-scope="{ item }" @click.native="loadFild(item.name)">
               <md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
               <md-table-cell md-label="Date" md-sort-by="createdAt">{{ item.createdAt }}</md-table-cell>
               <md-table-cell md-label="Size" md-sort-by="size" md-numeric>{{ item.size }}</md-table-cell>
@@ -68,11 +68,16 @@ export default {
       return this.$http.get(`/api/prod/projects/${project.id}/files`)
         .then((result) => {
           this.searched = this.files = result.body;
+          let fileName = 'default.m4a';
+          if(this.files.length > 0) {
+            fileName = this.files[0].name;
+          }
+
+          this.loadFild(fileName);
         });
     },
     loadFild : function (file) {
-      console.log(file);
-      this.$emit('clickedAudio', `/file/www.rehearsal-api.com/2/${file.name}`);
+      this.$emit('clickedAudio', `/file/2/${file}`);
     },
     addAudioFile: function (file) {
       this.files.push(file);

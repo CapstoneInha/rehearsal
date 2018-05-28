@@ -51,30 +51,4 @@ public class FileDao {
         return Optional.ofNullable(files.getFirst());
     }
 
-//    public Optional<File> findLastOne(Connection connection, long projectId) {
-//        try {
-//            Statement statement = connection.createStatement();
-//            ResultSet resultSet = statement.executeQuery(StringUtils.replace(FileSQL.FIND_LAST_FILE_BY_PROJECT_ID, "#id", String.valueOf(projectId)));
-//            File file = null;
-//            if (resultSet.next()) {
-//                file = new File();
-//                file.setId(resultSet.getLong("id"));
-//                file.setName(resultSet.getString("name"));
-//                file.setSize(resultSet.getLong("size"));
-//                file.setMediaType(MediaType.valueOf(resultSet.getString("media_type")));
-//                file.setCreatedAt(resultSet.getTimestamp("created_at").toLocalDateTime());
-//                file.setUpdatedAt(resultSet.getTimestamp("updated_at").toLocalDateTime());
-//                file.setMemberId(resultSet.getLong("member_id"));
-//            }
-//            resultSet.close();
-//            statement.close();
-//            connection.close();
-//            return Optional.of(file);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return Optional.empty();
-//    }
-
 }

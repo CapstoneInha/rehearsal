@@ -33,7 +33,6 @@
 
 <script>
 import PDFJS from 'pdfjs-dist';
-
 PDFJS.workerSrc = require('pdfjs-dist/build/pdf.worker');
 
 export default {
