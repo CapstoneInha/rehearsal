@@ -83,6 +83,18 @@ public class ProjectService {
 
     }
 
+    public void update(ProjectRequest projectDto) throws SQLSyntaxErrorException {
+        // TODO: 2018. 5. 27. memberId = 2 임시값, 세션 적용필요
+        long memberId = 2;
+        projectDto.setMemberId(memberId);
+        try {
+            projectDao.update(new Project(projectDto));
+        } catch (SQLException e) {
+            LOG.error(e);
+            throw new SQLSyntaxErrorException("parameter이 잘못되었습니다.");
+        }
+    }
+
     public ProjectResponse findOne(long projectId) throws SQLSyntaxErrorException {
         try {
             Project project = projectDao.findOne(projectId).orElseThrow(IllegalArgumentException::new);
@@ -92,7 +104,9 @@ public class ProjectService {
             projectResponse.setPlot(project.getPlot());
             projectResponse.setState(project.getState());
             projectResponse.setCreateAt(project.getCreateAt());
-            projectResponse.setImagePath(Constants.S3_URL + project.getMemberId() + "/" + project.getFileName());
+//            projectResponse.setImagePath(Constants.S3_URL + project.getMemberId() + "/" + project.getFileName());
+            projectResponse.setImagePath("/file/" + project.getMemberId() + "/" + project.getFileName());
+
             return projectResponse;
         } catch (SQLException e) {
             LOG.error(e);
@@ -111,7 +125,8 @@ public class ProjectService {
                 projectResponse.setPlot(project.getPlot());
                 projectResponse.setState(project.getState());
                 projectResponse.setCreateAt(project.getCreateAt());
-                projectResponse.setImagePath(Constants.S3_URL + project.getMemberId() + "/" + project.getFileName());
+//                projectResponse.setImagePath(Constants.S3_URL + project.getMemberId() + "/" + project.getFileName());
+                projectResponse.setImagePath("/file/" + project.getMemberId() + "/" + project.getFileName());
                 return projectResponse;
             }).collect(Collectors.toList());
 
