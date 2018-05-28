@@ -10,7 +10,23 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/api': {
+        target: 'https://ntqwa24xw8.execute-api.ap-northeast-2.amazonaws.com',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      },
+      '/file': {
+        target: 'https://s3.ap-northeast-2.amazonaws.com/www.rehearsal-api.com',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/file': ''
+        }
+      }
+
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
@@ -38,10 +54,12 @@ module.exports = {
 
   build: {
     // Template for index.html
-    index: path.resolve(__dirname, '../electron/src/dist/index.html'),
+    // index: path.resolve(__dirname, '../electron/src/dist/index.html'),
+    index: path.resolve(__dirname, '../dist/index.html'),
 
     // Paths
-    assetsRoot: path.resolve(__dirname, '../electron/src/dist'),
+    // assetsRoot: path.resolve(__dirname, '../electron/src/dist'),
+    assetsRoot: path.resolve(__dirname, '../src/dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
 

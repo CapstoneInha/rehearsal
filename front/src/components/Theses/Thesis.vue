@@ -1,12 +1,17 @@
 <template>
   <div>
-        <md-card-content>
-          <div class="md-layout md-gutter">
-            <div class="md-layout-item md-small-size-100">
-              <canvas ref="pdfRef"></canvas>
-            </div>
-          </div>
-        </md-card-content>
+    <md-card-content>
+      <div class="md-layout md-gutter">
+        <div class="md-layout-item md-small-size-100">
+          <canvas ref="pdfRef"></canvas>
+          <md-button id="prev" class="md-primary" @click.native='onPrevPage'>Prev</md-button>
+          <md-button id="next" class="md-primary" @click.native='onNextPage'>Next</md-button>
+          &nbsp; &nbsp;
+          <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+        </div>
+
+      </div>
+    </md-card-content>
   </div>
 </template>
 
@@ -21,28 +26,76 @@ export default {
     project: null
   },
   data() {
-    return {}
+    return {
+        pdfDoc: null,
+        pageNum: 1,
+        pageRendering: false,
+        pageNumPending: null,
+        scale: 0.8
+    }
   },
   methods: {
-    renderPdf(project) {
-      console.log(1111)
-        let loadingTask = PDFJS.getDocument(project.imagePath);
-        let canvas = this.$refs.pdfRef;
-        console.log(canvas)
-        loadingTask.promise.then(function (pdfDocument) {
-          return pdfDocument.getPage(2).then(function (pdfPage) {
-            let viewport = pdfPage.getViewport(1.0);
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            let ctx = canvas.getContext('2d');
-            let renderTask = pdfPage.render({
-              canvasContext: ctx,
-              viewport: viewport
-            });
+    renderPage(num) {
+      this.pageRendering = true;
+      this.pdfDoc.getPage(num)
+        .then((page) => {
+          console.log(page)
 
-            return renderTask.promise;
+          let viewport = page.getViewport(this.scale);
+          let canvas = this.$refs.pdfRef;
+          let ctx = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          // Render PDF page into canvas context
+          let renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+          };
+          let renderTask = page.render(renderContext);
+          // Wait for rendering to finish
+          renderTask.promise.then(() => {
+            this.pageRendering = false;
+            if (this.pageNumPending !== null) {
+              // New page rendering is pending
+              renderPage(this.pageNumPending);
+              this.pageNumPending = null;
+            }
           });
         });
+
+      // Update page counters
+      document.getElementById('page_num').textContent = num;
+    },
+    renderPdf(project) {
+      PDFJS.getDocument(project.imagePath)
+        .then((pdfDoc_) => {
+        this.pdfDoc = pdfDoc_;
+        document.getElementById('page_count').textContent = this.pdfDoc.numPages;
+        console.log(this.pageNum)
+        this.renderPage(this.pageNum);
+      });
+    },
+    queueRenderPage(num) {
+      if (this.pageRendering) {
+        this.pageNumPending = num;
+      } else {
+        this.renderPage(num);
+      }
+    },
+    onPrevPage() {
+      if (this.pageNum <= 1) {
+        return;
+      }
+      this.pageNum--;
+      this.queueRenderPage(this.pageNum);
+    },
+    onNextPage() {
+      if (this.pageNum >= this.pdfDoc.numPages) {
+        return;
+      }
+      this.pageNum++;
+      this.queueRenderPage(this.pageNum);
     }
   },
   watch: {

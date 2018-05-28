@@ -11,6 +11,9 @@
       <div class="md-layout-item">
         <audio-visualizer :audioPath="audioPath"></audio-visualizer>
       </div>
+      <div class="md-layout-item">
+        <train-form :project="project"></train-form>
+      </div>
     </div>
     <div class="md-layout md-gutter">
 
@@ -22,18 +25,21 @@
 import Thesis from './Thesis.vue'
 import AudioTable from './AudioTable.vue'
 import AudioVisualizer from './AudioVisualizer.vue'
+import TrainForm from './TrainForm.vue'
+
 
 export default {
   name: 'ThesisBase',
   components: {
     'Thesis': Thesis,
     'AudioTable': AudioTable,
-    'AudioVisualizer': AudioVisualizer
+    'AudioVisualizer': AudioVisualizer,
+    'TrainForm': TrainForm
   },
   data() {
     return {
       project: null,
-      audioPath: null
+      audioPath: null,
     }
   },
   methods: {
@@ -58,7 +64,7 @@ export default {
 
 <style lang="scss" scoped>
 .md-layout-item {
-  height: 40px;
+  /*height: 50px;*/
   display: block;
 
   &:after {
