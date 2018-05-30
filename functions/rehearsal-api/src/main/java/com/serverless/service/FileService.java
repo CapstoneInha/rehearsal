@@ -36,38 +36,40 @@ public class FileService {
         return fileService;
     }
 
-    public void create(FileDto fileDto, Map<String, String> pathParams) {
-        try {
-            // TODO: 2018. 5. 27. memberId = 2 임시값, 세션 적용필요
-            long memberId = 2;
-            long projectId = Long.parseLong(pathParams.get("projectId"));
-            String mediaType = StringUtils.substringBetween(fileDto.getData(), "data:", ";base64,");
-            String fileData = StringUtils.substringAfter(fileDto.getData(), ";base64,");
-            System.out.println("mediaType: " + mediaType + ", data: " + fileData);
-            long fileSize = upload(memberId + "/" + fileDto.getName(), fileData, mediaType);
-            File file = new File(fileDto);
-            file.setSize(fileSize);
-            file.setMemberId(memberId);
-            file.setCreatedAt(LocalDateTime.now());
-            file.setUpdatedAt(LocalDateTime.now());
-            file.setMediaType("audio/x-m4a");
-            long fileId = fileDao.create(file);
+    public void create(List<FileDto> fileDtos, Map<String, String> pathParams) {
+        fileDtos.forEach((fileDto) -> {
+            try {
+                // TODO: 2018. 5. 27. memberId = 2 임시값, 세션 적용필요
+                long memberId = 2;
+                long projectId = Long.parseLong(pathParams.get("projectId"));
+                String mediaType = StringUtils.substringBetween(fileDto.getData(), "data:", ";base64,");
+                String fileData = StringUtils.substringAfter(fileDto.getData(), ";base64,");
+                System.out.println("mediaType: " + mediaType + ", data: " + fileData);
+                long fileSize = upload(memberId + "/" + fileDto.getName(), fileData, mediaType);
+                File file = new File(fileDto);
+                file.setSize(fileSize);
+                file.setMemberId(memberId);
+                file.setCreatedAt(LocalDateTime.now());
+                file.setUpdatedAt(LocalDateTime.now());
+                file.setMediaType("audio/x-m4a");
+                long fileId = fileDao.create(file);
 
-            History history = new History();
-            history.setFileId(fileId);
-            history.setProjectId(projectId);
-            history.setCreateAt(LocalDateTime.now());
-            history.setEventType(EventType.CREATE_AUDIO);
-            historyDao.create(history);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+                History history = new History();
+                history.setFileId(fileId);
+                history.setProjectId(projectId);
+                history.setCreateAt(LocalDateTime.now());
+                history.setEventType(EventType.CREATE_AUDIO);
+                historyDao.create(history);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
 
     }
 
-    public List<File> find(long projectId) throws SQLSyntaxErrorException {
+    public List<File> find(long projectId, String eventType) throws SQLSyntaxErrorException {
         try {
-            return fileDao.find(projectId).orElseThrow(IllegalArgumentException::new);
+            return fileDao.find(projectId, eventType).orElseThrow(IllegalArgumentException::new);
         } catch (SQLException e) {
             LOG.error(e);
             throw new SQLSyntaxErrorException("잘못된 요청입니다.");

@@ -32,10 +32,11 @@ public class FileDao {
         return fileId;
     }
 
-    public Optional<List<File>> find(long projectId) throws SQLException {
+    public Optional<List<File>> find(long projectId, String eventType) throws SQLException {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         Map<String, Object> params = new ConcurrentHashMap<>();
         params.put("projectId", projectId);
+        params.put("eventType", eventType);
         LinkedList<File> files = jdbcTemplate.find(FileSQL.FIND_FILES_BY_PROJECT_ID, params, File.class);
         jdbcTemplate.batchUpdate();
         jdbcTemplate.close();

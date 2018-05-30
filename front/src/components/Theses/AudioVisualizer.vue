@@ -1,15 +1,15 @@
 <template>
-  <div>
   <md-card-content>
-    <div ref="peaks"></div>
-    <audio ref="audio" :src="audioPath" preload="auto">
-      <source type="audio/ogg">
-    </audio>
+    <md-card-media>
+      <div class='peaks' ref="peaks"></div>
+      <audio ref="audio" :src="audioPath" preload="auto">
+        <source type="audio/ogg">
+      </audio>
+    </md-card-media>
     <md-card-actions>
       <md-button @click="play">Click Me to Play Sound</md-button>
     </md-card-actions>
   </md-card-content>
-  </div>
 </template>
 
 <script>
@@ -35,8 +35,8 @@ export default {
         mediaElement: this.$refs.audio,
         container: this.$refs.peaks,
         audioContext: new AudioContext(),
-        height: 200,
-        zoomLevels: [8]
+        height: 300,
+        zoomLevels: [512]
       };
 
       this.peak = Peaks.init(option);
@@ -52,48 +52,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../../../node_modules/vue-material/src/components/MdAnimation/variables";
-@import "../../../node_modules/vue-material/src/theme/engine";
+.peaks {
+  width: 1000px;
 
-.card-expansion {
-  height: 480px;
-}
-
-.md-card {
-  width: 320px;
-  margin: 4px;
-  display: inline-block;
-  vertical-align: top;
-}
-
-.md-content {
-  width: 200px;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin-top: 60px;
-}
-
-.md-layout-item {
-  height: 40px;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  transition: .3s $md-transition-stand-timing;
-
-  &:after {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-}
-
-.md-field {
-  max-width: 300px;
-}
-
-.md-table {
-  width: 100%;
-  height: 100%;
 }
 </style>

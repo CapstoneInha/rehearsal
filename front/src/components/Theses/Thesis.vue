@@ -1,18 +1,21 @@
 <template>
-  <div>
-    <md-card-content>
-      <div class="md-layout md-gutter">
-        <div class="md-layout-item md-small-size-100">
+  <md-card-content>
+    <div class="md-layout md-gutter">
+      <div class="md-layout-item md-small-size-100">
+        <md-card-media>
           <canvas ref="pdfRef"></canvas>
+        </md-card-media>
+        <md-card-actions>
+          <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+
           <md-button id="prev" class="md-primary" @click.native='onPrevPage'>Prev</md-button>
           <md-button id="next" class="md-primary" @click.native='onNextPage'>Next</md-button>
           &nbsp; &nbsp;
-          <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
-        </div>
-
+        </md-card-actions>
       </div>
-    </md-card-content>
-  </div>
+
+    </div>
+  </md-card-content>
 </template>
 
 <script>
@@ -27,11 +30,11 @@ export default {
   },
   data() {
     return {
-        pdfDoc: null,
-        pageNum: 1,
-        pageRendering: false,
-        pageNumPending: null,
-        scale: 0.8
+      pdfDoc: null,
+      pageNum: 1,
+      pageRendering: false,
+      pageNumPending: null,
+      scale: 0.8
     }
   },
   methods: {
@@ -70,11 +73,11 @@ export default {
     renderPdf(project) {
       PDFJS.getDocument(project.imagePath)
         .then((pdfDoc_) => {
-        this.pdfDoc = pdfDoc_;
-        document.getElementById('page_count').textContent = this.pdfDoc.numPages;
-        console.log(this.pageNum)
-        this.renderPage(this.pageNum);
-      });
+          this.pdfDoc = pdfDoc_;
+          document.getElementById('page_count').textContent = this.pdfDoc.numPages;
+          console.log(this.pageNum)
+          this.renderPage(this.pageNum);
+        });
     },
     queueRenderPage(num) {
       if (this.pageRendering) {
@@ -108,4 +111,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 </style>

@@ -15,17 +15,8 @@ class FileSQL {
         SELECT f.*
         FROM FILES f
         INNER JOIN HISTORIES h ON h.file_id = f.id
-                                  and h.event_type = 'CREATE_AUDIO'
+                                  and h.event_type = :eventType
                                   and h.project_id = :projectId
     '''
 
-    public static final String FIND_LAST_FILE_BY_PROJECT_ID = '''
-        SELECT f.*
-        FROM FILES f
-        INNER JOIN HISTORIES h ON h.file_id = f.id
-                                   and h.event_type = 'CREATE_AUDIO'
-                                   and h.project_id = :projectId
-        ORDER BY f.id DESC
-        LIMIT 1
-    '''
 }

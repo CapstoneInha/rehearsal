@@ -24,10 +24,12 @@ public class FindFilesHandler extends ApiGatewayRequest {
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-        Map pathParameters = getPathParams(input);
+        Map<String, String> pathParameters = getPathParams(input);
+        Map<String, String> queryStrings = getQueryString(input);
+
         ApiGatewayResponse response;
         try {
-            List<File> files = fileService.find(Long.parseLong(pathParameters.get("projectId").toString()));
+            List<File> files = fileService.find(Long.parseLong(pathParameters.get("projectId")), queryStrings.getOrDefault("resultType", "'CREATE_AUDIO'"));
             response = ApiGatewayResponse.builder()
                     .setStatusCode(HttpStatus.SC_OK)
                     .setObjectBody(files)

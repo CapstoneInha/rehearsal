@@ -4,7 +4,8 @@
           <md-table v-model="searched" md-sort="name" md-sort-order="asc" md-card md-fixed-header>
             <md-table-toolbar>
               <div class="md-toolbar-section-start">
-                <h1 class="md-title">Audio Files</h1>
+                <h1 class="md-title">Audio Files &nbsp;<md-switch v-model="resultType" value="'COMPLETE_AUDIO'">Completed</md-switch></h1>
+
               </div>
               <md-field md-clearable class="md-toolbar-section-end">
                 <md-input placeholder="Search by file name..." ref="audioInput" v-model="search"
@@ -22,14 +23,11 @@
             </md-table-row>
           </md-table>
 
-          <create-audio :project="project" @clickedAudioAdd="addAudioFile"></create-audio>
         </md-card-content>
   </div>
 </template>
 
 <script>
-import CreateAudio from './CreateAudio.vue'
-
 const toLower = text => {
   return text.toString().toLowerCase()
 };
@@ -49,14 +47,12 @@ export default {
       msg: 'Welcome to Your Vue.js App',
       search: '',
       searched: [],
-      files: []
+      resultType: "'CREATE_AUDIO'"
     }
   },
-  components: {
-    'CreateAudio': CreateAudio
-  },
   props: {
-    project: null
+    project: null,
+    files: []
   },
   methods: {
     searchOnTable() {
@@ -64,13 +60,14 @@ export default {
     }, setRoute(id) {
       this.$router.push(id);
     },
-    findAudioList: function (project) {
-      return this.$http.get(`/api/prod/projects/${project.id}/files`)
+    findAudioList: function (resultType) {
+      return this.$http.get(`/api/prod/projects/${this.project.id}/files`, {params:  {resultType: resultType}})
         .then((result) => {
-          this.searched = this.files = result.body;
+          this.searched = result.body;
+          console.log(result.body);
           let fileName = 'default.m4a';
-          if(this.files.length > 0) {
-            fileName = this.files[0].name;
+          if(this.searched.length > 0) {
+            fileName = this.searched[0].name;
           }
 
           this.loadFild(fileName);
@@ -78,14 +75,22 @@ export default {
     },
     loadFild : function (file) {
       this.$emit('clickedAudio', `/file/2/${file}`);
-    },
-    addAudioFile: function (file) {
-      this.files.push(file);
     }
   },
   watch: {
-    project: function (newProject) {
-      this.findAudioList(newProject)
+    project: function () {
+      return this.findAudioList(this.resultType)
+    },
+    files: function (newFiles) {
+      newFiles.forEach((it) => {
+        this.searched.push(it);
+      })
+      console.log(this.searched);
+      console.log(this.files);
+    },
+    resultType: function (newType) {
+      console.log(newType||"'CREATE_AUDIO'")
+      return this.findAudioList(newType||"'CREATE_AUDIO'")
     }
   }
 }
@@ -98,7 +103,6 @@ export default {
 }
 
 .md-table {
-  width: 100%;
-  height: 100%;
+  width: 700px;
 }
 </style>

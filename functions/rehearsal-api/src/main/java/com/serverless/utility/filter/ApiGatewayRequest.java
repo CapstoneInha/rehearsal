@@ -13,7 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class ApiGatewayRequest implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
     private ObjectMapper mapper;
 
-    public ApiGatewayRequest() {
+    protected ObjectMapper getMapper() {
+        return mapper;
+    }
+
+    protected ApiGatewayRequest() {
         mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.registerModule(new JavaTimeModule());
@@ -30,13 +34,13 @@ public abstract class ApiGatewayRequest implements RequestHandler<Map<String, Ob
     }
 
     protected Map<String, String> getQueryString(Map<String, Object> input) {
-        ConcurrentHashMap pathParams = new ConcurrentHashMap<>();
+        ConcurrentHashMap queryStrings = new ConcurrentHashMap<>();
         Map pathParameters = (Map) input.get("queryStringParameters");
         pathParameters.forEach((key, value) -> {
-            pathParams.put(key.toString(), value.toString());
+            queryStrings.put(key.toString(), value.toString());
         });
 
-        return pathParams;
+        return queryStrings;
     }
 
     protected <T> T getBody(Map<String, Object> input, Class<T> bodyClass) {
