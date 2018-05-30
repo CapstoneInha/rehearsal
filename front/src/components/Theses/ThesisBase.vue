@@ -1,19 +1,21 @@
 <template>
   <div class="md-scrollbar">
     <div class="md-layout md-gutter">
-      <div class="md-layout-item">
+      <md-card >
         <Thesis :project="project"></Thesis>
-      </div>
+      </md-card>
 
-      <div class="md-layout-item">
-        <audio-table :project="project" @clickedAudio="changeAudioPath"></audio-table>
-      </div>
-      <div class="md-layout-item">
+
+      <md-card >
         <audio-visualizer :audioPath="audioPath"></audio-visualizer>
-      </div>
-      <div class="md-layout-item">
+      </md-card>
+      <md-card >
+        <audio-table :project="project" :files="files" @clickedAudio="changeAudioPath"></audio-table>
         <train-form :project="project"></train-form>
-      </div>
+      </md-card>
+      <md-card >
+        <upload-table :project="project" @clickedAudioAdd="addAudioFile"></upload-table>
+      </md-card>
     </div>
     <div class="md-layout md-gutter">
 
@@ -26,6 +28,7 @@ import Thesis from './Thesis.vue'
 import AudioTable from './AudioTable.vue'
 import AudioVisualizer from './AudioVisualizer.vue'
 import TrainForm from './TrainForm.vue'
+import UploadTable from './UploadTable.vue'
 
 
 export default {
@@ -34,12 +37,14 @@ export default {
     'Thesis': Thesis,
     'AudioTable': AudioTable,
     'AudioVisualizer': AudioVisualizer,
-    'TrainForm': TrainForm
+    'TrainForm': TrainForm,
+    'UploadTable': UploadTable
   },
   data() {
     return {
       project: null,
       audioPath: null,
+      files: []
     }
   },
   methods: {
@@ -53,6 +58,9 @@ export default {
     changeAudioPath(path) {
       console.log("base: " + path);
       this.audioPath = path;
+    },
+    addAudioFile: function (files) {
+      this.files = this.files.concat(files);
     }
   },
   created() {
@@ -63,13 +71,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.md-layout-item {
-  /*height: 50px;*/
-  display: block;
-
-  &:after {
-    width: 100%;
-    height: 100%;
-  }
+.md-card {
+  margin: 15px;
 }
 </style>

@@ -9,6 +9,7 @@
           <md-card-header>
             <div class="md-title">{{ project.title }}</div>
             <div class="md-subhead">{{ project.createAt }}</div>
+            <div class="md-subhead">{{ project.state }}</div>
           </md-card-header>
           <md-card-expand>
             <md-card-actions md-alignment="space-between">
